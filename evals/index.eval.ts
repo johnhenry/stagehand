@@ -18,13 +18,37 @@ import { extract_collaborators } from "./combination/extract_collaborators";
 import { extract_github_commits } from "./combination/extract_github_commits";
 import { extract_github_stars } from "./extract/extract_github_stars";
 import { extract_press_releases } from "./extract/extract_press_releases";
-import { extract_aigrant_companies} from "./extract/extract_aigrant_companies";
+import { extract_aigrant_companies } from "./extract/extract_aigrant_companies";
 import { extract_staff_members } from "./extract/extract_staff_members";
-import { extract_snowshoeing_destinations} from "./extract/extract_snowshoeing_destinations";
+import { extract_snowshoeing_destinations } from "./extract/extract_snowshoeing_destinations";
 import { costar } from "./observe/costar";
 import { vanta } from "./observe/vanta";
 import { vanta_h } from "./observe/vanta_h";
 import { EvalLogger } from "./utils";
+
+const taskCategories: Record<string, string> = {
+  vanta: 'observe',
+  vanta_h: 'observe',
+  costar: 'observe',
+  peeler_simple: 'act',
+  peeler_complex: 'act',
+  wikipedia: 'act',
+  simple_google_search: 'act',
+  laroche_form: 'act',
+  expedia_search: 'act',
+  amazon_add_to_cart: 'act',
+  google_jobs: 'combination',
+  homedepot: 'combination',
+  extract_partners: 'combination',
+  arxiv: 'combination',
+  extract_collaborators: 'combination',
+  extract_github_commits: 'combination',
+  extract_github_stars: 'extract',
+  extract_press_releases: 'extract',
+  extract_aigrant_companies: 'extract',
+  extract_staff_members: 'extract',
+  extract_snowshoeing_destinations: 'extract',
+};
 
 const env: "BROWSERBASE" | "LOCAL" =
   process.env.EVAL_ENV?.toLowerCase() === "browserbase"
@@ -36,21 +60,21 @@ const models: AvailableModel[] = ["gpt-4o", "claude-3-5-sonnet-20241022"];
 const tasks: Record<string, EvalFunction> = {
   vanta,
   vanta_h,
+  costar,
   peeler_simple,
   peeler_complex,
   wikipedia,
   simple_google_search,
-  extract_github_stars,
-  extract_collaborators,
-  extract_github_commits,
-  costar,
+  laroche_form,
+  expedia_search,
+  amazon_add_to_cart,
   google_jobs,
   homedepot,
   extract_partners,
-  laroche_form,
   arxiv,
-  expedia_search,
-  amazon_add_to_cart,
+  extract_collaborators,
+  extract_github_commits,
+  extract_github_stars,
   extract_press_releases,
   extract_aigrant_companies,
   extract_staff_members,
@@ -105,8 +129,8 @@ const testcases = [
   "peeler_complex",
   "simple_google_search",
   "extract_github_stars",
-  "extract_collaborators_from_github_repository",
-  "extract_last_twenty_github_commits",
+  "extract_collaborators",
+  "extract_github_commits",
   "google_jobs",
   "homedepot",
   "extract_partners",
@@ -114,14 +138,13 @@ const testcases = [
   "arxiv",
   "amazon_add_to_cart",
   "extract_press_releases",
-  "expedia_search",
   "extract_aigrant_companies",
   "extract_staff_members",
   "extract_snowshoeing_destinations",
 ];
 
 const generateSummary = async (summary: any, results: any[]) => {
-  const exactMatch = summary.scores?.["Exact match"] || { score: null };
+  const exactMatchScore = summary.scores?.["Exact match"] || { score: null };
 
   const taskStatuses = results.map((result) => ({
     name: result.input.name,
@@ -139,7 +162,8 @@ const generateSummary = async (summary: any, results: any[]) => {
     .map((task) => ({ name: task.name, modelName: task.modelName }));
 
   const formattedSummary = {
-    exactMatchScore: exactMatch.score !== null ? exactMatch.score * 100 : null,
+    exactMatchScore:
+      exactMatchScore.score !== null ? exactMatchScore.score * 100 : null,
     totalTasks,
     passedTasks,
     failedTasks,
@@ -152,49 +176,83 @@ const generateSummary = async (summary: any, results: any[]) => {
   console.log("Evaluation summary written to eval-summary.json");
 };
 
+const args = process.argv.slice(2);
+let filterByCategory: string | null = null;
+let filterByEvalName: string | null = null;
+
+if (args.length > 0) {
+  if (args[0].toLowerCase() === 'category') {
+    if (args[1] === '-') {
+      filterByCategory = args[2];
+    } else {
+      filterByCategory = args[1];
+    }
+    if (!filterByCategory) {
+      console.error("Error: Category name not specified.");
+      process.exit(1);
+    }
+    const validCategories = ["extract", "observe", "act", "combination"];
+    if (!validCategories.includes(filterByCategory)) {
+      console.error(`Error: Invalid category "${filterByCategory}". Valid categories are: ${validCategories.join(", ")}`);
+      process.exit(1);
+    }
+  } else {
+    filterByEvalName = args[0];
+    if (!testcases.includes(filterByEvalName)) {
+      console.error(`Error: Evaluation "${filterByEvalName}" does not exist.`);
+      process.exit(1);
+    }
+  }
+}
+
 const ciEvals = process.env.CI_EVALS?.split(",").map((e) => e.trim());
 
-const args = process.argv.slice(2);
-const filter = args[0];
+const generateFilteredTestcases = () => {
+  let allTestcases = models.flatMap((model) =>
+    testcases.map((test) => ({
+      input: { name: test, modelName: model },
+      name: test,
+      tags: [model, test],
+      metadata: {
+        model,
+        test,
+      },
+    }))
+  );
+
+  if (ciEvals && ciEvals.length > 0) {
+    allTestcases = allTestcases.filter((testcase) =>
+      ciEvals.includes(testcase.name),
+    );
+  }
+
+  if (filterByCategory) {
+    allTestcases = allTestcases.filter((testcase) =>
+      taskCategories[testcase.name] === filterByCategory
+    );
+  }
+
+  if (filterByEvalName) {
+    allTestcases = allTestcases.filter(
+      (testcase) =>
+        testcase.name === filterByEvalName || testcase.input.name === filterByEvalName,
+    );
+  }
+
+  return allTestcases;
+};
 
 (async () => {
   try {
     const evalResult = await Eval("stagehand", {
-      data: () => {
-        let allTestcases = models.flatMap((model) =>
-          testcases.flatMap((test) => ({
-            input: { name: test, modelName: model },
-            name: test,
-            tags: [model, test],
-            metadata: {
-              model,
-              test,
-            },
-          })),
-        );
-
-        if (ciEvals && ciEvals.length > 0) {
-          allTestcases = allTestcases.filter((testcase) =>
-            ciEvals.includes(testcase.name),
-          );
-        }
-
-        if (filter) {
-          allTestcases = allTestcases.filter(
-            (testcase) =>
-              testcase.name === filter || testcase.input.name === filter,
-          );
-        }
-
-        return allTestcases;
-      },
+      data: generateFilteredTestcases,
       task: async (input: {
         name: keyof typeof tasks;
         modelName: AvailableModel;
       }) => {
         const logger = new EvalLogger();
         try {
-          // Handle predefined tasks
+          // Execute the task
           const result = await tasks[input.name]({
             modelName: input.modelName,
             logger,

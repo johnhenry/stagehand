@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { initStagehand } from "../utils";
 import { EvalFunction } from "../types/evals";
 
 export const extract_staff_members: EvalFunction = async ({ modelName, logger }) => {
