@@ -14,10 +14,13 @@ import { extract_partners } from "./combination/extract_partners";
 import { google_jobs } from "./combination/google_jobs";
 import { homedepot } from "./combination/homedepot";
 import { peeler_complex } from "./combination/peeler_complex";
-import { extract_collaborators } from "./extract/extract_collaborators";
-import { extract_github_commits } from "./extract/extract_github_commits";
+import { extract_collaborators } from "./combination/extract_collaborators";
+import { extract_github_commits } from "./combination/extract_github_commits";
 import { extract_github_stars } from "./extract/extract_github_stars";
 import { extract_press_releases } from "./extract/extract_press_releases";
+import { extract_aigrant_companies} from "./extract/extract_aigrant_companies";
+import { extract_staff_members } from "./extract/extract_staff_members";
+import { extract_snowshoeing_destinations} from "./extract/extract_snowshoeing_destinations";
 import { costar } from "./observe/costar";
 import { vanta } from "./observe/vanta";
 import { vanta_h } from "./observe/vanta_h";
@@ -49,6 +52,9 @@ const tasks: Record<string, EvalFunction> = {
   expedia_search,
   amazon_add_to_cart,
   extract_press_releases,
+  extract_aigrant_companies,
+  extract_staff_members,
+  extract_snowshoeing_destinations,
 };
 
 const exactMatch = (args: {
@@ -109,6 +115,9 @@ const testcases = [
   "amazon_add_to_cart",
   "extract_press_releases",
   "expedia_search",
+  "extract_aigrant_companies",
+  "extract_staff_members",
+  "extract_snowshoeing_destinations",
 ];
 
 const generateSummary = async (summary: any, results: any[]) => {
