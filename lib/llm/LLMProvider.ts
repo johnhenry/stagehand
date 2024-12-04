@@ -23,6 +23,7 @@ export class LLMProvider {
     "llava:34b": "ollama",
     "llama3.2-vision:11b": "ollama",
     "llama3.2-vision:0b": "ollama",
+    "llama3.2:latest":"ollama"
   };
 
   private logger: (message: LogLine) => void;
