@@ -85,3 +85,11 @@ export class EvalLogger {
     return this.logs;
   }
 }
+
+export function normalizeString(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+    .trim();
+}
