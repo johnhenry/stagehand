@@ -103,7 +103,7 @@ export const extract_aigrant_companies: EvalFunction = async ({ modelName, logge
           type: "object",
         },
         actual: {
-          value: JSON.stringify(companies[staff_members.length - 1]),
+          value: JSON.stringify(companies[companies.length - 1]),
           type: "object",
         },
       },
