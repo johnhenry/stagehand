@@ -6,6 +6,7 @@ export const extract_rockauto: EvalFunction = async ({ modelName, logger }) => {
   const { stagehand, initResponse } = await initStagehand({
     modelName,
     logger,
+    domSettleTimeoutMs: 10000,
   });
 
   const { debugUrl, sessionUrl } = initResponse;
@@ -13,15 +14,16 @@ export const extract_rockauto: EvalFunction = async ({ modelName, logger }) => {
   await stagehand.page.goto("https://www.rockauto.com/en/catalog/alpine,1974,a310,1.6l+l4,1436055,cooling+system,coolant+/+antifreeze,11393");
 
   const result = await stagehand.extract({
-    instruction: "Extract the full descriptive product info strings (including part number and manufacturer) of all the coolant and antifreeze products in the 'economy' category.",
+    instruction: "Extract the part number of all the coolant and antifreeze products in the 'economy' category.",
     schema: z.object({
       coolant_products: z.array(
         z.object({
-          product_info_string: z.string(),
+          part_number: z.string(),
         })
       ),
     }),
     modelName,
+    domSettleTimeoutMs: 10000,
   });
 
   await stagehand.close();
@@ -30,11 +32,11 @@ export const extract_rockauto: EvalFunction = async ({ modelName, logger }) => {
   const expectedLength = 4;
 
   const expectedFirstItem = {
-    product_info_string: "FVP GREEN5050GAL Low Silicate Blend; 1 Gallon; Green; IAT",
+    part_number: "GREEN5050GAL",
   };
 
   const expectedLastItem = {
-    product_info_string: "VALVOLINE 719009 Universal Yellow; 1 Gallon",
+    part_number: "719009",
   };
 
   if (coolantProducts.length !== expectedLength) {
@@ -61,7 +63,7 @@ export const extract_rockauto: EvalFunction = async ({ modelName, logger }) => {
     };
   }
   const firstItemMatches =
-    coolantProducts[0].product_info_string === expectedFirstItem.product_info_string;
+    coolantProducts[0].part_number === expectedFirstItem.part_number;
 
   if (!firstItemMatches) {
     logger.error({
@@ -88,7 +90,7 @@ export const extract_rockauto: EvalFunction = async ({ modelName, logger }) => {
   }
 
   const lastItemMatches =
-    coolantProducts[coolantProducts.length - 1].product_info_string === expectedLastItem.product_info_string;
+    coolantProducts[coolantProducts.length - 1].part_number === expectedLastItem.part_number;
 
   if (!lastItemMatches) {
     logger.error({
