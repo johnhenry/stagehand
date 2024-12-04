@@ -98,6 +98,30 @@ const errorMatch = (args: {
   };
 };
 
+const generateTaskCategories = (): Record<string, string> => {
+  const categories = ["observe", "act", "combination", "extract"];
+  const taskCategories: Record<string, string> = {};
+
+  categories.forEach((category) => {
+    const categoryPath = path.join(__dirname, category);
+    try {
+      const files = fs.readdirSync(categoryPath);
+      files.forEach((file) => {
+        if (file.endsWith(".ts")) {
+          const taskName = file.replace(".ts", "");
+          taskCategories[taskName] = category;
+        }
+      });
+    } catch (error) {
+      console.warn(`Warning: Category directory ${category} not found`);
+    }
+  });
+
+  return taskCategories;
+};
+
+const taskCategories = generateTaskCategories();
+
 const testcases = [
   "vanta",
   "vanta_h",
@@ -177,8 +201,16 @@ if (args.length > 0) {
     }
   } else {
     filterByEvalName = args[0];
-    if (!testcases.includes(filterByEvalName)) {
-      console.error(`Error: Evaluation "${filterByEvalName}" does not exist.`);
+    if (!Object.keys(taskCategories).includes(filterByEvalName)) {
+      console.error(
+        `Error: Test "${filterByEvalName}" not found in any category.`,
+      );
+      console.error("Available tests:");
+      Object.keys(taskCategories)
+        .sort()
+        .forEach((test) => {
+          console.error(`  - ${test} (${taskCategories[test]})`);
+        });
       process.exit(1);
     }
   }
@@ -222,32 +254,16 @@ const generateFilteredTestcases = () => {
   return allTestcases;
 };
 
-const generateTaskCategories = (): Record<string, string> => {
-  const categories = ["observe", "act", "combination", "extract"];
-  const taskCategories: Record<string, string> = {};
-
-  categories.forEach((category) => {
-    const categoryPath = path.join(__dirname, category);
-    try {
-      const files = fs.readdirSync(categoryPath);
-      files.forEach((file) => {
-        if (file.endsWith(".ts")) {
-          const taskName = file.replace(".ts", "");
-          taskCategories[taskName] = category;
-        }
-      });
-    } catch (error) {
-      console.warn(`Warning: Category directory ${category} not found`);
-    }
-  });
-
-  return taskCategories;
+const getEvalConfig = (filterByEvalName: string | null) => {
+  return {
+    maxConcurrency: filterByEvalName ? 1 : 20,
+    trialCount: filterByEvalName ? 1 : 5,
+  };
 };
-
-const taskCategories = generateTaskCategories();
 
 (async () => {
   try {
+    const evalConfig = getEvalConfig(filterByEvalName);
     const evalResult = await Eval("stagehand", {
       data: generateFilteredTestcases,
       task: async (input: {
@@ -291,8 +307,8 @@ const taskCategories = generateTaskCategories();
         }
       },
       scores: [exactMatch, errorMatch],
-      maxConcurrency: 20,
-      trialCount: 5,
+      maxConcurrency: evalConfig.maxConcurrency,
+      trialCount: evalConfig.trialCount,
     });
 
     await generateSummary(evalResult.summary, evalResult.results);
