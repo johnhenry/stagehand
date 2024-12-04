@@ -25,30 +25,7 @@ import { costar } from "./observe/costar";
 import { vanta } from "./observe/vanta";
 import { vanta_h } from "./observe/vanta_h";
 import { EvalLogger } from "./utils";
-
-const taskCategories: Record<string, string> = {
-  vanta: 'observe',
-  vanta_h: 'observe',
-  costar: 'observe',
-  peeler_simple: 'act',
-  peeler_complex: 'act',
-  wikipedia: 'act',
-  simple_google_search: 'act',
-  laroche_form: 'act',
-  expedia_search: 'act',
-  amazon_add_to_cart: 'act',
-  google_jobs: 'combination',
-  homedepot: 'combination',
-  extract_partners: 'combination',
-  arxiv: 'combination',
-  extract_collaborators: 'combination',
-  extract_github_commits: 'combination',
-  extract_github_stars: 'extract',
-  extract_press_releases: 'extract',
-  extract_aigrant_companies: 'extract',
-  extract_staff_members: 'extract',
-  extract_snowshoeing_destinations: 'extract',
-};
+import path from "path";
 
 const env: "BROWSERBASE" | "LOCAL" =
   process.env.EVAL_ENV?.toLowerCase() === "browserbase"
@@ -181,8 +158,8 @@ let filterByCategory: string | null = null;
 let filterByEvalName: string | null = null;
 
 if (args.length > 0) {
-  if (args[0].toLowerCase() === 'category') {
-    if (args[1] === '-') {
+  if (args[0].toLowerCase() === "category") {
+    if (args[1] === "-") {
       filterByCategory = args[2];
     } else {
       filterByCategory = args[1];
@@ -193,7 +170,9 @@ if (args.length > 0) {
     }
     const validCategories = ["extract", "observe", "act", "combination"];
     if (!validCategories.includes(filterByCategory)) {
-      console.error(`Error: Invalid category "${filterByCategory}". Valid categories are: ${validCategories.join(", ")}`);
+      console.error(
+        `Error: Invalid category "${filterByCategory}". Valid categories are: ${validCategories.join(", ")}`,
+      );
       process.exit(1);
     }
   } else {
@@ -217,7 +196,7 @@ const generateFilteredTestcases = () => {
         model,
         test,
       },
-    }))
+    })),
   );
 
   if (ciEvals && ciEvals.length > 0) {
@@ -227,20 +206,45 @@ const generateFilteredTestcases = () => {
   }
 
   if (filterByCategory) {
-    allTestcases = allTestcases.filter((testcase) =>
-      taskCategories[testcase.name] === filterByCategory
+    allTestcases = allTestcases.filter(
+      (testcase) => taskCategories[testcase.name] === filterByCategory,
     );
   }
 
   if (filterByEvalName) {
     allTestcases = allTestcases.filter(
       (testcase) =>
-        testcase.name === filterByEvalName || testcase.input.name === filterByEvalName,
+        testcase.name === filterByEvalName ||
+        testcase.input.name === filterByEvalName,
     );
   }
 
   return allTestcases;
 };
+
+const generateTaskCategories = (): Record<string, string> => {
+  const categories = ["observe", "act", "combination", "extract"];
+  const taskCategories: Record<string, string> = {};
+
+  categories.forEach((category) => {
+    const categoryPath = path.join(__dirname, category);
+    try {
+      const files = fs.readdirSync(categoryPath);
+      files.forEach((file) => {
+        if (file.endsWith(".ts")) {
+          const taskName = file.replace(".ts", "");
+          taskCategories[taskName] = category;
+        }
+      });
+    } catch (error) {
+      console.warn(`Warning: Category directory ${category} not found`);
+    }
+  });
+
+  return taskCategories;
+};
+
+const taskCategories = generateTaskCategories();
 
 (async () => {
   try {
