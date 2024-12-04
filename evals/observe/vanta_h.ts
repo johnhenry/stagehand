@@ -15,7 +15,7 @@ export const vanta_h: EvalFunction = async ({ modelName, logger }) => {
     instruction: "find the buy now button",
   });
 
-  await stagehand.context.close();
+  await stagehand.close();
 
   // we should have no saved observation since the element shouldn't exist
   return {

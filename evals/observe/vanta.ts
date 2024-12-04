@@ -14,7 +14,7 @@ export const vanta: EvalFunction = async ({ modelName, logger }) => {
   const observations = await stagehand.observe();
 
   if (observations.length === 0) {
-    await stagehand.context.close();
+    await stagehand.close();
     return {
       _success: false,
       observations,
@@ -52,7 +52,7 @@ export const vanta: EvalFunction = async ({ modelName, logger }) => {
     }
   }
 
-  await stagehand.context.close();
+  await stagehand.close();
 
   return {
     _success: foundMatch,

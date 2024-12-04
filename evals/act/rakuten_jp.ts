@@ -19,7 +19,8 @@ export const rakuten_jp: EvalFunction = async ({ modelName, logger }) => {
   const successUrl =
     "https://netsuper.rakuten.co.jp/inageya/search/?keyword=%E9%A6%99%E8%8F%9C";
 
-  await stagehand.context.close();
+  await stagehand.close();
+
   return {
     _success: url === successUrl,
     debugUrl,

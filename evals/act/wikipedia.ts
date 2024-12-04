@@ -16,7 +16,8 @@ export const wikipedia: EvalFunction = async ({ modelName, logger }) => {
 
   const url = "https://en.wikipedia.org/wiki/Hit_and_run_(baseball)";
   const currentUrl = stagehand.page.url();
-  await stagehand.context.close();
+
+  await stagehand.close();
 
   return {
     _success: currentUrl === url,

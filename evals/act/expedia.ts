@@ -30,6 +30,6 @@ export const expedia: EvalFunction = async ({ modelName, logger }) => {
   } catch (error) {
     // ... error handling
   } finally {
-    await stagehand.context.close();
+    await stagehand.close();
   }
 };

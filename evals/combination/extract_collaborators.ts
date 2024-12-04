@@ -34,6 +34,8 @@ export const extract_collaborators: EvalFunction = async ({
       modelName,
     });
 
+    await stagehand.close();
+
     return {
       _success: contributors.length === 20,
       contributors,
@@ -43,7 +45,9 @@ export const extract_collaborators: EvalFunction = async ({
     };
   } catch (error) {
     console.error("Error or timeout occurred:", error);
-    await stagehand.context.close();
+
+    await stagehand.close();
+
     return {
       _success: false,
       error: JSON.parse(JSON.stringify(error, null, 2)),
