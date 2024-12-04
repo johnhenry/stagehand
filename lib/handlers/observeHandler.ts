@@ -104,6 +104,7 @@ export class StagehandObserveHandler {
     );
 
     const { selectorMap } = evalResult;
+    // has to be like this atm because of the re-assignment
     let { outputString } = evalResult;
 
     let annotatedScreenshot: Buffer | undefined;

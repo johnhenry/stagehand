@@ -2,10 +2,14 @@ import OpenAI, { ClientOptions } from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import {
   ChatCompletion,
+  ChatCompletionAssistantMessageParam,
   ChatCompletionContentPartImage,
+  ChatCompletionContentPartRefusal,
   ChatCompletionContentPartText,
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionMessageParam,
+  ChatCompletionSystemMessageParam,
+  ChatCompletionUserMessageParam,
 } from "openai/resources/chat";
 import { LogLine } from "../../types/log";
 import { AvailableModel } from "../../types/model";
@@ -37,15 +41,17 @@ export class OpenAIClient extends LLMClient {
   async createChatCompletion<T = ChatCompletion>(
     options: ChatCompletionOptions,
   ): Promise<T> {
-    const optionsWithoutImage = { ...options };
-    delete optionsWithoutImage.image;
+    const { image, requestId, ...optionsWithoutImageAndRequestId } = options;
     this.logger({
       category: "openai",
       message: "creating chat completion",
       level: 1,
       auxiliary: {
         options: {
-          value: JSON.stringify(optionsWithoutImage),
+          value: JSON.stringify({
+            ...optionsWithoutImageAndRequestId,
+            requestId,
+          }),
           type: "object",
         },
         modelName: {
@@ -66,11 +72,10 @@ export class OpenAIClient extends LLMClient {
     };
 
     if (this.enableCaching) {
-      const cachedResponse = await this.cache.get(
+      const cachedResponse = await this.cache.get<T>(
         cacheOptions,
         options.requestId,
       );
-
       if (cachedResponse) {
         this.logger({
           category: "llm_cache",
@@ -123,7 +128,7 @@ export class OpenAIClient extends LLMClient {
     }
 
     const { response_model, ...openAiOptions } = {
-      ...options,
+      ...optionsWithoutImageAndRequestId,
       model: this.modelName,
     };
 
@@ -147,35 +152,63 @@ export class OpenAIClient extends LLMClient {
       },
     });
 
-    delete openAiOptions.requestId;
-    delete openAiOptions.image;
-
     const formattedMessages: ChatCompletionMessageParam[] =
       options.messages.map((message) => {
         if (Array.isArray(message.content)) {
           const contentParts = message.content.map((content) => {
             if ("image_url" in content) {
-              return {
+              const imageContent: ChatCompletionContentPartImage = {
                 image_url: {
                   url: content.image_url.url,
                 },
                 type: "image_url",
-              } as ChatCompletionContentPartImage;
+              };
+              return imageContent;
             } else {
-              return {
+              const textContent: ChatCompletionContentPartText = {
                 text: content.text,
                 type: "text",
-              } as ChatCompletionContentPartText;
+              };
+              return textContent;
             }
           });
 
-          return {
-            ...message,
-            content: contentParts,
-          } as ChatCompletionMessageParam;
+          if (message.role === "system") {
+            const formattedMessage: ChatCompletionSystemMessageParam = {
+              ...message,
+              role: "system",
+              content: contentParts.filter(
+                (content): content is ChatCompletionContentPartText =>
+                  content.type === "text",
+              ),
+            };
+            return formattedMessage;
+          } else if (message.role === "user") {
+            const formattedMessage: ChatCompletionUserMessageParam = {
+              ...message,
+              role: "user",
+              content: contentParts,
+            };
+            return formattedMessage;
+          } else {
+            const formattedMessage: ChatCompletionAssistantMessageParam = {
+              ...message,
+              role: "assistant",
+              content: contentParts.filter(
+                (content): content is ChatCompletionContentPartText =>
+                  content.type === "text",
+              ),
+            };
+            return formattedMessage;
+          }
         }
 
-        return message as ChatCompletionMessageParam;
+        const formattedMessage: ChatCompletionUserMessageParam = {
+          role: "user",
+          content: message.content,
+        };
+
+        return formattedMessage;
       });
 
     const body: ChatCompletionCreateParamsNonStreaming = {
@@ -219,9 +252,7 @@ export class OpenAIClient extends LLMClient {
         );
       }
 
-      return {
-        ...parsedData,
-      };
+      return parsedData;
     }
 
     if (this.enableCaching) {
@@ -247,6 +278,8 @@ export class OpenAIClient extends LLMClient {
       this.cache.set(cacheOptions, response, options.requestId);
     }
 
+    // if the function was called with a response model, it would have returned earlier
+    // so we can safely cast here to T, which defaults to ChatCompletion
     return response as T;
   }
 }
