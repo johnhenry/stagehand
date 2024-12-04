@@ -8,6 +8,7 @@ import {
   ModelProvider,
   ClientOptions,
 } from "../../types/model";
+import { OllamaClient } from "./OllamaClient";
 
 export class LLMProvider {
   private modelToProviderMap: { [key in AvailableModel]: ModelProvider } = {
@@ -17,6 +18,11 @@ export class LLMProvider {
     "claude-3-5-sonnet-latest": "anthropic",
     "claude-3-5-sonnet-20240620": "anthropic",
     "claude-3-5-sonnet-20241022": "anthropic",
+    "llava:7b": "ollama",
+    "llava:13b": "ollama",
+    "llava:34b": "ollama",
+    "llama3.2-vision:11b": "ollama",
+    "llama3.2-vision:0b": "ollama",
   };
 
   private logger: (message: LogLine) => void;
@@ -71,6 +77,12 @@ export class LLMProvider {
           this.logger,
           this.enableCaching,
           this.cache,
+          modelName,
+          clientOptions,
+        );
+      case "ollama":
+        return new OllamaClient(
+          this.logger,
           modelName,
           clientOptions,
         );
