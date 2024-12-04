@@ -1,7 +1,7 @@
 import { LLMClient, ChatCompletionOptions } from "./LLMClient";
 import { LogLine } from "../../types/log";
 import { AvailableModel } from "../../types/model";
-import Ollama from "ollama";
+import { Ollama } from "ollama";
 
 export class OllamaClient extends LLMClient {
   private client: Ollama;
@@ -10,7 +10,7 @@ export class OllamaClient extends LLMClient {
   constructor(
     logger: (message: LogLine) => void,
     modelName: AvailableModel,
-    clientOptions?: any
+    clientOptions?: any,
   ) {
     super(modelName);
     this.client = new Ollama(clientOptions);
@@ -64,3 +64,4 @@ export class OllamaClient extends LLMClient {
     return response;
   }
 }
+export default OllamaClient;

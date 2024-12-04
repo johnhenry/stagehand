@@ -7,6 +7,7 @@ async function example() {
     verbose: 1,
     debugDom: true,
     enableCaching: false,
+    modelName: "llama3.2-vision:11b",
   });
 
   await stagehand.init();
@@ -19,6 +20,7 @@ async function example() {
       url: z.string(),
     }),
   });
+  console.log({ contributor });
 
   console.log(`Our favorite contributor is ${contributor.username}`);
 

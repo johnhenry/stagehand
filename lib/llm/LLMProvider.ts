@@ -23,7 +23,7 @@ export class LLMProvider {
     "llava:34b": "ollama",
     "llama3.2-vision:11b": "ollama",
     "llama3.2-vision:90b": "ollama",
-    "llama3.2:latest":"ollama"
+    "llama3.2:latest": "ollama",
   };
 
   private logger: (message: LogLine) => void;
@@ -82,11 +82,7 @@ export class LLMProvider {
           clientOptions,
         );
       case "ollama":
-        return new OllamaClient(
-          this.logger,
-          modelName,
-          clientOptions,
-        );
+        return new OllamaClient(this.logger, modelName, clientOptions);
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }
