@@ -21,7 +21,7 @@ export const nonsense_action: EvalFunction = async ({ modelName, logger }) => {
     const expectedResult = {
       success: false,
       message:
-        "Action not found on the current page after checking all chunks.",
+        "Action was not able to be completed.",
       action: "click on the first banana",
     };
 
