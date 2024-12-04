@@ -125,6 +125,26 @@ console.log(`Our favorite contributor is ${contributor.username}`);
 
 This simple snippet will open a browser, navigate to the Stagehand repo, and log the top contributor.
 
+### 5. Choosing Providers
+
+To choose a provider, you can specify the model name when initializing the `Stagehand` instance or when calling methods like `act()` and `extract()`. For example:
+
+```javascript
+const stagehand = new Stagehand({
+  env: "BROWSERBASE",
+  modelName: "llava:7b",
+});
+```
+
+You can also specify the model name when calling methods:
+
+```javascript
+await stagehand.act({
+  action: "click on the login button",
+  modelName: "llava:7b",
+});
+```
+
 ## API Reference
 
 ### `Stagehand()`
@@ -334,7 +354,7 @@ Stagehand leverages a generic LLM client architecture to support various languag
 
 #### Currently Supported Models
 
-Stagehand currently supports the following models from OpenAI and Anthropic:
+Stagehand currently supports the following models from OpenAI, Anthropic, and Ollama:
 
 - **OpenAI Models:**
 
@@ -346,6 +366,13 @@ Stagehand currently supports the following models from OpenAI and Anthropic:
   - `claude-3-5-sonnet-latest`
   - `claude-3-5-sonnet-20240620`
   - `claude-3-5-sonnet-20241022`
+
+- **Ollama Vision Models:**
+  - `llava:7b`
+  - `llava:13b`
+  - `llava:34b`
+  - `llama3.2-vision:11b`
+  - `llama3.2-vision:0b`
 
 These models can be specified when initializing the `Stagehand` instance or when calling methods like `act()` and `extract()`.
 
