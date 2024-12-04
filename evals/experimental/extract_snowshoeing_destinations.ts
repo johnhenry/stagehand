@@ -45,6 +45,8 @@ export const extract_snowshoeing_destinations: EvalFunction = async ({ modelName
       },
     });
 
+    await stagehand.close()
+
     const _success = snowshoeing_regions.snowshoeing_regions.length === 10;
 
     return {

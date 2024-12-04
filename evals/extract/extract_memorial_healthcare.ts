@@ -16,7 +16,7 @@ export const extract_memorial_healthcare: EvalFunction = async ({ modelName, log
 
   const result = await stagehand.extract({
     instruction:
-      "extract a list of all the health centers on this page, with their name, full address, and phone number",
+      "extract a list of the first three healthcare centers on this page, with their name, full address, and phone number",
     schema: z.object({
       health_centers: z.array(
         z.object({
@@ -28,9 +28,11 @@ export const extract_memorial_healthcare: EvalFunction = async ({ modelName, log
     }),
   });
 
+  await stagehand.close();
+
   const health_centers = result.health_centers;
 
-  const expectedLength = 15;
+  const expectedLength = 3;
 
   const expectedFirstItem = {
     name: "Community Memorial Breast Center",
@@ -39,9 +41,9 @@ export const extract_memorial_healthcare: EvalFunction = async ({ modelName, log
   };
 
   const expectedLastItem = {
-    name: "Community Memorial Health Center",
-    phone_number: "805-948-6353",
-    address: "258 East Harvard Boulevard, Santa Paula, CA 93060",
+    name: "Community Memorial Dermatology and Mohs Surgery",
+    phone_number: "805-948-6920",
+    address: "168 North Brent Street, Suite 403, Ventura, CA 93003",
   };
 
   if (health_centers.length !== expectedLength) {

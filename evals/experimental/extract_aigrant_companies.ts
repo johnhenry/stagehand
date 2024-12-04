@@ -24,6 +24,7 @@ export const extract_aigrant_companies: EvalFunction = async ({ modelName, logge
     }),
   });
 
+  await stagehand.close()
   const companies = companyList.companies;
   const expectedLength = 91;
 
