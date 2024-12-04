@@ -78,27 +78,9 @@ const errorMatch = (args: {
   };
 };
 
-const testcases = [
-  "vanta",
-  "vanta_h",
-  ...(env === "BROWSERBASE" ? [] : ["peeler_simple"]), // peeler_simple is not supported on Browserbase
-  "wikipedia",
-  "peeler_complex",
-  "simple_google_search",
-  "extract_github_stars",
-  "extract_collaborators",
-  "extract_github_commits",
-  "google_jobs",
-  "homedepot",
-  "extract_partners",
-  "laroche_form",
-  "arxiv",
-  "amazon_add_to_cart",
-  "extract_press_releases",
-  "extract_aigrant_companies",
-  "extract_staff_members",
-  "extract_snowshoeing_destinations",
-];
+const testcases = Object.keys(tasks).filter((name) =>
+  env === "BROWSERBASE" ? name !== "peeler_simple" : true,
+);
 
 const generateSummary = async (summary: any, results: any[]) => {
   const exactMatchScore = summary.scores?.["Exact match"] || { score: null };
