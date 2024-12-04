@@ -43,3 +43,11 @@ export type AnthropicTransformedResponse = {
     total_tokens: number;
   };
 };
+
+export interface AnthropicJsonSchemaObject {
+  definitions?: {
+    MySchema?: { properties?: Record<string, unknown>; required?: string[] };
+  };
+  properties?: Record<string, unknown>;
+  required?: string[];
+}

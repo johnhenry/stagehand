@@ -4,7 +4,6 @@ import {
   ChatCompletion,
   ChatCompletionAssistantMessageParam,
   ChatCompletionContentPartImage,
-  ChatCompletionContentPartRefusal,
   ChatCompletionContentPartText,
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionMessageParam,
@@ -67,7 +66,7 @@ export class OpenAIClient extends LLMClient {
       top_p: options.top_p,
       frequency_penalty: options.frequency_penalty,
       presence_penalty: options.presence_penalty,
-      image: options.image,
+      image: image,
       response_model: options.response_model,
     };
 

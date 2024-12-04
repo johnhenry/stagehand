@@ -8,6 +8,7 @@ import {
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { LogLine } from "../../types/log";
 import {
+  AnthropicJsonSchemaObject,
   AnthropicTransformedResponse,
   AvailableModel,
 } from "../../types/model";
@@ -355,7 +356,7 @@ export class AnthropicClient extends LLMClient {
   }
 }
 
-const extractSchemaProperties = (jsonSchema: any) => {
+const extractSchemaProperties = (jsonSchema: AnthropicJsonSchemaObject) => {
   const schemaRoot = jsonSchema.definitions?.MySchema || jsonSchema;
 
   return {
