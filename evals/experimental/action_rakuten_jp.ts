@@ -11,6 +11,9 @@ export const rakuten_jp: EvalFunction = async ({ modelName, logger }) => {
 
   await stagehand.page.goto("https://www.rakuten.co.jp/");
   await stagehand.act({ action: "click on online supermarket" });
+
+  await stagehand.act({ action: "if there is a popup, close it" });
+
   await stagehand.act({ action: "navigate to Inageya Online Supermarket" });
   await stagehand.act({ action: "click the search bar input" });
   await stagehand.act({ action: "search for '香菜'" });
