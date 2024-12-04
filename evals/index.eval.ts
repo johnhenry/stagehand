@@ -1,31 +1,10 @@
 import { Eval } from "braintrust";
 import fs from "fs";
+import path from "path";
 import process from "process";
 import { EvalFunction } from "../types/evals";
 import { AvailableModel } from "../types/model";
-import { amazon_add_to_cart } from "./act/amazon_add_to_cart";
-import { expedia_search } from "./act/expedia_search";
-import { laroche_form } from "./act/laroche_form";
-import { peeler_simple } from "./act/peeler_simple";
-import { simple_google_search } from "./act/simple_google_search";
-import { wikipedia } from "./act/wikipedia";
-import { arxiv } from "./combination/arxiv";
-import { extract_partners } from "./combination/extract_partners";
-import { google_jobs } from "./combination/google_jobs";
-import { homedepot } from "./combination/homedepot";
-import { peeler_complex } from "./combination/peeler_complex";
-import { extract_collaborators } from "./combination/extract_collaborators";
-import { extract_github_commits } from "./combination/extract_github_commits";
-import { extract_github_stars } from "./extract/extract_github_stars";
-import { extract_press_releases } from "./extract/extract_press_releases";
-import { extract_aigrant_companies } from "./extract/extract_aigrant_companies";
-import { extract_staff_members } from "./extract/extract_staff_members";
-import { extract_snowshoeing_destinations } from "./extract/extract_snowshoeing_destinations";
-import { costar } from "./observe/costar";
-import { vanta } from "./observe/vanta";
-import { vanta_h } from "./observe/vanta_h";
 import { EvalLogger } from "./utils";
-import path from "path";
 
 const env: "BROWSERBASE" | "LOCAL" =
   process.env.EVAL_ENV?.toLowerCase() === "browserbase"
@@ -34,29 +13,30 @@ const env: "BROWSERBASE" | "LOCAL" =
 
 const models: AvailableModel[] = ["gpt-4o", "claude-3-5-sonnet-20241022"];
 
-const tasks: Record<string, EvalFunction> = {
-  vanta,
-  vanta_h,
-  costar,
-  peeler_simple,
-  peeler_complex,
-  wikipedia,
-  simple_google_search,
-  laroche_form,
-  expedia_search,
-  amazon_add_to_cart,
-  google_jobs,
-  homedepot,
-  extract_partners,
-  arxiv,
-  extract_collaborators,
-  extract_github_commits,
-  extract_github_stars,
-  extract_press_releases,
-  extract_aigrant_companies,
-  extract_staff_members,
-  extract_snowshoeing_destinations,
+const generateTasks = (): Record<string, EvalFunction> => {
+  const tasks: Record<string, EvalFunction> = {};
+  const categories = ["observe", "act", "combination", "extract"];
+
+  categories.forEach((category) => {
+    const categoryPath = path.join(__dirname, category);
+    try {
+      const files = fs.readdirSync(categoryPath);
+      files.forEach((file) => {
+        if (file.endsWith(".ts")) {
+          const taskName = file.replace(".ts", "");
+          const taskModule = require(`./${category}/${taskName}`);
+          tasks[taskName] = taskModule[taskName];
+        }
+      });
+    } catch (error) {
+      console.warn(`Warning: Category directory ${category} not found`);
+    }
+  });
+
+  return tasks;
 };
+
+const tasks = generateTasks();
 
 const exactMatch = (args: {
   input: any;
