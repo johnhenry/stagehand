@@ -60,6 +60,8 @@ export const google_jobs: EvalFunction = async ({ modelName, logger }) => {
             )),
       );
 
+    await stagehand.close();
+
     return {
       _success: isJobDetailsValid,
       jobDetails,
@@ -82,6 +84,9 @@ export const google_jobs: EvalFunction = async ({ modelName, logger }) => {
         },
       },
     });
+
+    await stagehand.close();
+
     return {
       _success: false,
       debugUrl,
@@ -89,7 +94,5 @@ export const google_jobs: EvalFunction = async ({ modelName, logger }) => {
       error: JSON.parse(JSON.stringify(error, null, 2)),
       logs: logger.getLogs(),
     };
-  } finally {
-    await stagehand.context.close();
   }
 };

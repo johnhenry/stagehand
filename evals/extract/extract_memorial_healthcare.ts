@@ -3,7 +3,10 @@ import { initStagehand } from "../utils";
 import { EvalFunction } from "../types/evals";
 import { normalizeString } from "../utils";
 
-export const extract_memorial_healthcare: EvalFunction = async ({ modelName, logger }) => {
+export const extract_memorial_healthcare: EvalFunction = async ({
+  modelName,
+  logger,
+}) => {
   const { stagehand, initResponse } = await initStagehand({
     modelName,
     logger,
@@ -23,7 +26,7 @@ export const extract_memorial_healthcare: EvalFunction = async ({ modelName, log
           name: z.string(),
           phone_number: z.string(),
           address: z.string(),
-        })
+        }),
       ),
     }),
   });
@@ -37,7 +40,7 @@ export const extract_memorial_healthcare: EvalFunction = async ({ modelName, log
   const expectedFirstItem = {
     name: "Community Memorial Breast Center",
     phone_number: "805-948-5093",
-    address: "168 North Brent Street, Suite 401, Ventura, CA 93003"
+    address: "168 North Brent Street, Suite 401, Ventura, CA 93003",
   };
 
   const expectedLastItem = {
@@ -61,6 +64,7 @@ export const extract_memorial_healthcare: EvalFunction = async ({ modelName, log
         },
       },
     });
+
     return {
       _success: false,
       error: "Incorrect number of health centers extracted",
@@ -72,7 +76,8 @@ export const extract_memorial_healthcare: EvalFunction = async ({ modelName, log
 
   const normalizeAndCompare = (actual, expected) =>
     normalizeString(actual.name) === normalizeString(expected.name) &&
-    normalizeString(actual.phone_number) === normalizeString(expected.phone_number) &&
+    normalizeString(actual.phone_number) ===
+      normalizeString(expected.phone_number) &&
     normalizeString(actual.address) === normalizeString(expected.address);
 
   if (!normalizeAndCompare(health_centers[0], expectedFirstItem)) {
@@ -99,7 +104,12 @@ export const extract_memorial_healthcare: EvalFunction = async ({ modelName, log
     };
   }
 
-  if (!normalizeAndCompare(health_centers[health_centers.length - 1], expectedLastItem)) {
+  if (
+    !normalizeAndCompare(
+      health_centers[health_centers.length - 1],
+      expectedLastItem,
+    )
+  ) {
     logger.error({
       message: "Last health center does not match expected",
       level: 0,

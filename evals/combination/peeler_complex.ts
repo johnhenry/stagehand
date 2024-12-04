@@ -30,6 +30,8 @@ export const peeler_complex: EvalFunction = async ({ modelName, logger }) => {
       modelName: "gpt-4o-2024-08-06",
     });
 
+    await stagehand.close();
+
     return {
       _success: price === 11.99,
       price,
@@ -52,6 +54,9 @@ export const peeler_complex: EvalFunction = async ({ modelName, logger }) => {
         },
       },
     });
+
+    await stagehand.close();
+
     return {
       _success: false,
       error: JSON.parse(JSON.stringify(error, null, 2)),
@@ -59,7 +64,5 @@ export const peeler_complex: EvalFunction = async ({ modelName, logger }) => {
       sessionUrl,
       logs: logger.getLogs(),
     };
-  } finally {
-    await stagehand.context.close();
   }
 };

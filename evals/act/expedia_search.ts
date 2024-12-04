@@ -57,6 +57,6 @@ export const expedia_search: EvalFunction = async ({ modelName, logger }) => {
       logs: logger.getLogs(),
     };
   } finally {
-    await stagehand.context.close().catch(() => {});
+    await stagehand.close();
   }
 };

@@ -44,7 +44,9 @@ export const extract_github_commits: EvalFunction = async ({
         },
       },
     });
-    await stagehand.context.close().catch(() => {});
+
+    await stagehand.close();
+
     return {
       _success: commits.length === 20,
       commits,
@@ -54,7 +56,9 @@ export const extract_github_commits: EvalFunction = async ({
     };
   } catch (error) {
     console.error("Error or timeout occurred:", error);
-    await stagehand.context.close().catch(() => {});
+
+    await stagehand.close();
+
     return {
       _success: false,
       error: JSON.parse(JSON.stringify(error, null, 2)),

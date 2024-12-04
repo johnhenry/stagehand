@@ -2,7 +2,10 @@ import { z } from "zod";
 import { initStagehand } from "../utils";
 import { EvalFunction } from "../types/evals";
 
-export const extract_staff_members: EvalFunction = async ({ modelName, logger }) => {
+export const extract_staff_members: EvalFunction = async ({
+  modelName,
+  logger,
+}) => {
   const { stagehand, initResponse } = await initStagehand({
     modelName,
     logger,
@@ -21,7 +24,7 @@ export const extract_staff_members: EvalFunction = async ({ modelName, logger })
         z.object({
           name: z.string(),
           job_title: z.string(),
-        })
+        }),
       ),
     }),
   });
@@ -55,6 +58,9 @@ export const extract_staff_members: EvalFunction = async ({ modelName, logger })
         },
       },
     });
+
+    await stagehand.close();
+
     return {
       _success: false,
       error: "Incorrect number of staff members extracted",
@@ -83,6 +89,9 @@ export const extract_staff_members: EvalFunction = async ({ modelName, logger })
         },
       },
     });
+
+    await stagehand.close();
+
     return {
       _success: false,
       error: "First staff member does not match expected",
@@ -94,7 +103,8 @@ export const extract_staff_members: EvalFunction = async ({ modelName, logger })
 
   const lastItemMatches =
     staff_members[staff_members.length - 1].name === expectedLastItem.name &&
-    staff_members[staff_members.length - 1].job_title === expectedLastItem.job_title;
+    staff_members[staff_members.length - 1].job_title ===
+      expectedLastItem.job_title;
 
   if (!lastItemMatches) {
     logger.error({
@@ -111,6 +121,9 @@ export const extract_staff_members: EvalFunction = async ({ modelName, logger })
         },
       },
     });
+
+    await stagehand.close();
+
     return {
       _success: false,
       error: "Last staff member does not match expected",
@@ -119,6 +132,8 @@ export const extract_staff_members: EvalFunction = async ({ modelName, logger })
       sessionUrl,
     };
   }
+
+  await stagehand.close();
 
   return {
     _success: true,

@@ -32,7 +32,7 @@ export const amazon_add_to_cart: EvalFunction = async ({
   const currentUrl = stagehand.page.url();
   const expectedUrlPrefix = "https://www.amazon.com/ap/signin";
 
-  await stagehand.context.close();
+  await stagehand.close();
 
   return {
     _success: currentUrl.startsWith(expectedUrlPrefix),

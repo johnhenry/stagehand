@@ -21,7 +21,7 @@ export const simple_google_search: EvalFunction = async ({
   const expectedUrl = "https://www.google.com/search?q=OpenAI";
   const currentUrl = stagehand.page.url();
 
-  await stagehand.context.close();
+  await stagehand.close();
 
   return {
     _success: currentUrl.startsWith(expectedUrl),

@@ -44,6 +44,6 @@ export const nonsense_action: EvalFunction = async ({ modelName, logger }) => {
       logs: logger.getLogs(),
     };
   } finally {
-    await stagehand.context.close();
+    await stagehand.close();
   }
 };

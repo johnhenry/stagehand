@@ -53,6 +53,6 @@ export const laroche_form: EvalFunction = async ({ modelName, logger }) => {
       logs: logger.getLogs(),
     };
   } finally {
-    await stagehand.context.close();
+    await stagehand.close();
   }
 };

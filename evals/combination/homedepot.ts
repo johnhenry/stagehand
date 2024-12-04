@@ -48,6 +48,8 @@ export const homedepot: EvalFunction = async ({ modelName, logger }) => {
       !productSpecs.productSpecs ||
       productSpecs.productSpecs.length !== 1
     ) {
+      await stagehand.close();
+
       return {
         _success: false,
         productSpecs,
@@ -60,6 +62,8 @@ export const homedepot: EvalFunction = async ({ modelName, logger }) => {
     const hasFourZerosAndOne4 =
       (productSpecs.productSpecs[0].burnerBTU.match(/0/g) || []).length === 4 &&
       (productSpecs.productSpecs[0].burnerBTU.match(/4/g) || []).length === 1;
+
+    await stagehand.close();
 
     return {
       _success: hasFourZerosAndOne4,
@@ -83,6 +87,9 @@ export const homedepot: EvalFunction = async ({ modelName, logger }) => {
         },
       },
     });
+
+    await stagehand.close();
+
     return {
       _success: false,
       error: JSON.parse(JSON.stringify(error, null, 2)),
@@ -90,7 +97,5 @@ export const homedepot: EvalFunction = async ({ modelName, logger }) => {
       sessionUrl,
       logs: logger.getLogs(),
     };
-  } finally {
-    await stagehand.context.close();
   }
 };

@@ -31,7 +31,8 @@ export const apple: EvalFunction = async ({ modelName, logger }) => {
   );
   const isVisible = await successMessageLocator.isVisible();
 
-  await stagehand.context.close();
+  await stagehand.close();
+
   return {
     _success: isVisible,
     debugUrl,

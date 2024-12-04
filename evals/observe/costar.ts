@@ -47,7 +47,7 @@ export const costar: EvalFunction = async ({ modelName, logger }) => {
     const isTitleValid =
       articleTitle.title !== null && articleTitle.title.length > 5;
 
-    await stagehand.context.close();
+    await stagehand.close();
 
     return {
       title: articleTitle.title,
@@ -71,6 +71,9 @@ export const costar: EvalFunction = async ({ modelName, logger }) => {
         },
       },
     });
+
+    await stagehand.close();
+
     return {
       title: null,
       _success: false,
@@ -78,7 +81,5 @@ export const costar: EvalFunction = async ({ modelName, logger }) => {
       sessionUrl,
       logs: logger.getLogs(),
     };
-  } finally {
-    await stagehand.context.close();
   }
 };
